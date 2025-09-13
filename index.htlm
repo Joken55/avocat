@@ -153,6 +153,7 @@
             font-weight: 600;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+            margin: 5px;
         }
 
         .btn:hover {
@@ -168,6 +169,12 @@
         .btn-danger {
             background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             box-shadow: 0 4px 15px rgba(220,53,69,0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            box-shadow: 0 4px 15px rgba(255,193,7,0.3);
+            color: #212529;
         }
 
         .table-container {
@@ -208,6 +215,9 @@
 
         .status-actif { color: #28a745; font-weight: bold; }
         .status-inactif { color: #dc3545; font-weight: bold; }
+        .status-terminé { color: #28a745; font-weight: bold; }
+        .status-en-cours { color: #ffc107; font-weight: bold; }
+        .status-en-attente { color: #dc3545; font-weight: bold; }
 
         .stats-grid {
             display: grid;
@@ -327,6 +337,29 @@
             font-weight: bold;
             color: #007bff;
             margin-bottom: 15px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         @media (max-width: 768px) {
@@ -612,6 +645,9 @@
         <div id="services" class="tab-content">
             <div class="section">
                 <h2>💼 Tarifs des Services</h2>
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="ajouterNouveauService()">➕ Ajouter un Service</button>
+                </div>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -623,42 +659,8 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Consultation</td>
-                                <td>150€/h</td>
-                                <td>-</td>
-                                <td>20%</td>
-                                <td><button class="btn">Modifier</button></td>
-                            </tr>
-                            <tr>
-                                <td>Affaire Pénale</td>
-                                <td>250€/h</td>
-                                <td>3000€</td>
-                                <td>25%</td>
-                                <td><button class="btn">Modifier</button></td>
-                            </tr>
-                            <tr>
-                                <td>Divorce</td>
-                                <td>200€/h</td>
-                                <td>2500€</td>
-                                <td>20%</td>
-                                <td><button class="btn">Modifier</button></td>
-                            </tr>
-                            <tr>
-                                <td>Commercial</td>
-                                <td>300€/h</td>
-                                <td>5000€</td>
-                                <td>30%</td>
-                                <td><button class="btn">Modifier</button></td>
-                            </tr>
-                            <tr>
-                                <td>Immobilier</td>
-                                <td>180€/h</td>
-                                <td>1500€</td>
-                                <td>18%</td>
-                                <td><button class="btn">Modifier</button></td>
-                            </tr>
+                        <tbody id="servicesTable">
+                            <!-- Les services seront ajoutés ici dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -726,6 +728,38 @@
         let employees = [];
         let currentWeekCases = [];
         let currentWeek = '2025-W37';
+        let services = [
+            {
+                type: "Consultation",
+                tarif: 150,
+                forfait: "-",
+                commission: 20
+            },
+            {
+                type: "Affaire Pénale",
+                tarif: 250,
+                forfait: "3000€",
+                commission: 25
+            },
+            {
+                type: "Divorce",
+                tarif: 200,
+                forfait: "2500€",
+                commission: 20
+            },
+            {
+                type: "Commercial",
+                tarif: 300,
+                forfait: "5000€",
+                commission: 30
+            },
+            {
+                type: "Immobilier",
+                tarif: 180,
+                forfait: "1500€",
+                commission: 18
+            }
+        ];
 
         // Données d'exemple
         const sampleEmployees = [
@@ -784,6 +818,7 @@
             updateCurrentWeekCases();
             updateLawyerSelect();
             updateCurrentWeekDisplay();
+            updateServicesTable();
         });
 
         function openTab(evt, tabName) {
@@ -797,315 +832,3 @@
                 tablinks[i].classList.remove("active");
             }
             document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
-
-        function ajouterEmploye() {
-            const name = document.getElementById('employeeName').value;
-            const role = document.getElementById('employeeRole').value;
-            const salary = parseInt(document.getElementById('employeeSalary').value);
-            const commission = parseInt(document.getElementById('employeeCommission').value);
-            const date = document.getElementById('employeeDate').value;
-            const status = document.getElementById('employeeStatus').value;
-
-            if (name && salary && commission) {
-                employees.push({
-                    name: name,
-                    role: role,
-                    salary: salary,
-                    commission: commission,
-                    date: date,
-                    status: status
-                });
-                
-                updateEmployesList();
-                updateLawyerSelect();
-                
-                // Reset form
-                document.getElementById('employeeName').value = '';
-                document.getElementById('employeeSalary').value = '';
-                document.getElementById('employeeCommission').value = '';
-                document.getElementById('employeeDate').value = '';
-                
-                alert('Employé ajouté avec succès !');
-            } else {
-                alert('Veuillez remplir tous les champs obligatoires.');
-            }
-        }
-
-        function updateEmployesList() {
-            const container = document.getElementById('employeesList');
-            container.innerHTML = '';
-            
-            employees.forEach((emp, index) => {
-                const card = document.createElement('div');
-                card.className = 'employee-card';
-                card.innerHTML = `
-                    <div class="employee-header">
-                        <div>
-                            <div class="employee-name">${emp.name}</div>
-                            <div class="employee-role">${emp.role}</div>
-                        </div>
-                        <div class="status-${emp.status.toLowerCase()}">${emp.status}</div>
-                    </div>
-                    <div class="employee-stats">
-                        <div class="employee-stat">
-                            <div class="employee-stat-value">${emp.salary}€</div>
-                            <div class="employee-stat-label">Salaire Base</div>
-                        </div>
-                        <div class="employee-stat">
-                            <div class="employee-stat-value">${emp.commission}%</div>
-                            <div class="employee-stat-label">Commission</div>
-                        </div>
-                        <div class="employee-stat">
-                            <div class="employee-stat-value">${new Date(emp.date).toLocaleDateString('fr-FR')}</div>
-                            <div class="employee-stat-label">Date Embauche</div>
-                        </div>
-                        <div class="employee-stat">
-                            <button class="btn btn-danger" onclick="supprimerEmploye(${index})">🗑️ Supprimer</button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function supprimerEmploye(index) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')) {
-                employees.splice(index, 1);
-                updateEmployesList();
-                updateLawyerSelect();
-            }
-        }
-
-        function updateLawyerSelect() {
-            const select = document.getElementById('assignedLawyer');
-            select.innerHTML = '<option value="">Sélectionner un avocat</option>';
-            
-            employees.filter(emp => 
-                emp.role.includes('Avocat') || emp.role.includes('Associé')
-            ).forEach(lawyer => {
-                const option = document.createElement('option');
-                option.value = lawyer.name;
-                option.textContent = lawyer.name;
-                select.appendChild(option);
-            });
-        }
-
-        function ajouterAffaire() {
-            const client = document.getElementById('clientName').value;
-            const type = document.getElementById('caseType').value;
-            const lawyer = document.getElementById('assignedLawyer').value;
-            const honoraires = parseInt(document.getElementById('caseHonoraires').value);
-            const frais = parseInt(document.getElementById('caseFrais').value) || 0;
-            const status = document.getElementById('caseStatus').value;
-            const description = document.getElementById('caseDescription').value;
-
-            if (client && lawyer && honoraires) {
-                currentWeekCases.push({
-                    client: client,
-                    type: type,
-                    lawyer: lawyer,
-                    honoraires: honoraires,
-                    frais: frais,
-                    status: status,
-                    description: description
-                });
-                
-                updateCurrentWeekCases();
-                updateDashboardStats();
-                
-                // Reset form
-                document.getElementById('clientName').value = '';
-                document.getElementById('caseHonoraires').value = '';
-                document.getElementById('caseFrais').value = '';
-                document.getElementById('caseDescription').value = '';
-                
-                alert('Affaire ajoutée avec succès !');
-            } else {
-                alert('Veuillez remplir tous les champs obligatoires.');
-            }
-        }
-
-        function updateCurrentWeekCases() {
-            const tbody = document.getElementById('currentWeekCases');
-            tbody.innerHTML = '';
-            
-            currentWeekCases.forEach((cas, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${cas.client}</td>
-                    <td>${cas.type}</td>
-                    <td>${cas.lawyer}</td>
-                    <td>${cas.honoraires.toLocaleString('fr-FR')}€</td>
-                    <td>${cas.frais.toLocaleString('fr-FR')}€</td>
-                    <td><span class="status-${cas.status.replace(' ', '-').toLowerCase()}">${cas.status}</span></td>
-                    <td>
-                        <button class="btn btn-danger" onclick="supprimerAffaire(${index})">🗑️</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function supprimerAffaire(index) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette affaire ?')) {
-                currentWeekCases.splice(index, 1);
-                updateCurrentWeekCases();
-                updateDashboardStats();
-            }
-        }
-
-        function updateDashboardStats() {
-            const totalRevenue = currentWeekCases.reduce((sum, cas) => sum + cas.honoraires, 0);
-            const totalExpenses = currentWeekCases.reduce((sum, cas) => sum + cas.frais, 0);
-            const totalProfit = totalRevenue - totalExpenses;
-            const totalCases = currentWeekCases.length;
-
-            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('fr-FR') + '€';
-            document.getElementById('totalExpenses').textContent = totalExpenses.toLocaleString('fr-FR') + '€';
-            document.getElementById('totalProfit').textContent = totalProfit.toLocaleString('fr-FR') + '€';
-            document.getElementById('totalCases').textContent = totalCases;
-        }
-
-        function nouveleSemaine() {
-            if (confirm('Êtes-vous sûr de vouloir créer une nouvelle semaine ? Les données actuelles seront archivées.')) {
-                // Archiver la semaine actuelle
-                const currentWeekData = {
-                    week: currentWeek,
-                    cases: [...currentWeekCases],
-                    revenue: currentWeekCases.reduce((sum, cas) => sum + cas.honoraires, 0),
-                    expenses: currentWeekCases.reduce((sum, cas) => sum + cas.frais, 0)
-                };
-                
-                // Simuler le stockage (en production, vous sauvegarderiez en base de données)
-                localStorage.setItem(`week_${currentWeek}`, JSON.stringify(currentWeekData));
-                
-                // Nouvelle semaine
-                const now = new Date();
-                const weekNumber = getWeekNumber(now);
-                currentWeek = `2025-W${weekNumber}`;
-                currentWeekCases = [];
-                
-                updateCurrentWeekDisplay();
-                updateCurrentWeekCases();
-                updateDashboardStats();
-                
-                alert('Nouvelle semaine créée avec succès !');
-            }
-        }
-
-        function getWeekNumber(date) {
-            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        }
-
-        function updateCurrentWeekDisplay() {
-            const now = new Date();
-            const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() - now.getDay() + 1);
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            
-            const formatDate = (date) => {
-                return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long' });
-            };
-            
-            document.getElementById('currentWeek').textContent = 
-                `Semaine du ${formatDate(startOfWeek)} au ${formatDate(endOfWeek)} ${now.getFullYear()}`;
-        }
-
-        function chargerSemaine() {
-            const selectedWeek = document.getElementById('weekSelector').value;
-            const weekData = localStorage.getItem(`week_${selectedWeek}`);
-            
-            if (weekData) {
-                const data = JSON.parse(weekData);
-                
-                document.getElementById('weekRevenue').textContent = data.revenue.toLocaleString('fr-FR') + '€';
-                document.getElementById('weekExpenses').textContent = data.expenses.toLocaleString('fr-FR') + '€';
-                document.getElementById('weekProfit').textContent = (data.revenue - data.expenses).toLocaleString('fr-FR') + '€';
-                document.getElementById('weekCases').textContent = data.cases.length;
-                
-                const tbody = document.getElementById('historicalCases');
-                tbody.innerHTML = '';
-                
-                data.cases.forEach(cas => {
-                    const lawyer = employees.find(emp => emp.name === cas.lawyer);
-                    const commission = lawyer ? Math.round(cas.honoraires * lawyer.commission / 100) : 0;
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${cas.client}</td>
-                        <td>${cas.type}</td>
-                        <td>${cas.lawyer}</td>
-                        <td>${cas.honoraires.toLocaleString('fr-FR')}€</td>
-                        <td>${cas.frais.toLocaleString('fr-FR')}€</td>
-                        <td>${commission.toLocaleString('fr-FR')}€</td>
-                        <td><span class="status-${cas.status.replace(' ', '-').toLowerCase()}">${cas.status}</span></td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                document.getElementById('weeklyData').style.display = 'block';
-            } else {
-                alert('Aucune donnée trouvée pour cette semaine.');
-            }
-        }
-
-        function calculerSalaires() {
-            const tbody = document.getElementById('salaireTable');
-            tbody.innerHTML = '';
-            
-            employees.forEach(emp => {
-                const casesForEmployee = currentWeekCases.filter(cas => cas.lawyer === emp.name);
-                const totalCommissions = casesForEmployee.reduce((sum, cas) => {
-                    return sum + (cas.honoraires * emp.commission / 100);
-                }, 0);
-                
-                const performanceBonus = casesForEmployee.length > 3 ? emp.salary * 0.1 : 0;
-                const totalSalary = emp.salary + totalCommissions + performanceBonus;
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${emp.name}</td>
-                    <td>${emp.salary.toLocaleString('fr-FR')}€</td>
-                    <td>${Math.round(totalCommissions).toLocaleString('fr-FR')}€</td>
-                    <td>${Math.round(performanceBonus).toLocaleString('fr-FR')}€</td>
-                    <td><strong>${Math.round(totalSalary).toLocaleString('fr-FR')}€</strong></td>
-                `;
-                tbody.appendChild(row);
-            });
-            
-            document.getElementById('salaireResults').style.display = 'block';
-        }
-
-        function exporterDonnees() {
-            const data = {
-                employees: employees,
-                currentWeek: currentWeek,
-                currentWeekCases: currentWeekCases,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `comptabilite_avocat_${currentWeek}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        }
-
-        // Initialisation des données au démarrage
-        setTimeout(() => {
-            updateDashboardStats();
-        }, 100);
-    </script>
-</body>
-</html>
